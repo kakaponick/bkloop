@@ -7,7 +7,7 @@
 | Путь | Что |
 | --- | --- |
 | `claude/skills/bkloop/SKILL.md` | оркестратор `/bkloop [N] [jK] <goal>` |
-| `claude/skills/bkloop/spike-lease.mjs` | аренда аккаунтов из `.spike/sessions/` и зеркало `.spike/` в worktree |
+| `claude/skills/bkloop/spike-lease.mjs` | аренда аккаунтов из `.spike/sessions/` и зеркало `.spike/` в worktree — [опционально](#spike-lease-опционально) |
 | `claude/skills/bkloop/spend.mjs` | расход токенов по сабагентам сессии, для отчёта |
 | `claude/skills/spike/SKILL.md` | `/spike <question>` — исследование неизвестного |
 | `claude/agents/` | `bkloop-implement`, `bkloop-debug`, `bkloop-critic`, `spike-researcher` |
@@ -35,6 +35,27 @@ node bkloop/install.mjs <путь к репо проекта>
 ## Проект
 
 bkloop читает правила из `CLAUDE.md` проекта: команды установки, типов, тестов, миграций, запуск воркера, основная ветка, строгие правила. Чего там нет — решение, записанное в отчёт. Живые ресурсы (аккаунты, прокси, образцы) — в `.spike/`, описаны в `.spike/README.md`; раздел «Limits» — единственные ограничения.
+
+## Spike lease (опционально)
+
+Нужен, только когда агенты работают с живыми аккаунтами — сессиями, которые нельзя поднимать из двух процессов сразу (Telegram, кабинеты с привязкой к IP). Нет аккаунтов — `.spike/sessions/` пуст, `link` даёт пустое зеркало, `acquire` не вызывается; ничего настраивать не надо.
+
+Как работает:
+
+- Аккаунт — папка `.spike/sessions/<name>/` в основной рабочей копии.
+- Каждый worktree прогона получает зеркало `.spike/` ссылками — всё, кроме `sessions/`.
+- `acquire` берёт атомарную аренду (`.lease` в папке сессии) и только тогда ссылает папку в worktree. Без аренды папки в worktree нет: скрипт или тест падает на отсутствующем пути, а не делит сессию с другим процессом.
+- `spike-guard` блокирует обход: ручные ссылки в `.spike`, копирование из `sessions/`, удаление `.lease`.
+
+```
+node .claude/skills/bkloop/spike-lease.mjs link <checkout>
+node .claude/skills/bkloop/spike-lease.mjs acquire <checkout> <session> [--wait s]
+node .claude/skills/bkloop/spike-lease.mjs release <checkout> <session>
+node .claude/skills/bkloop/spike-lease.mjs unlink <checkout>
+node .claude/skills/bkloop/spike-lease.mjs status
+```
+
+Пробы в worktree не кладите под `.spike/`: это ссылка в основную копию, файл окажется там, а `@/`-импорты разрешатся от её `tsconfig`, не от worktree.
 
 ## Запуск
 
