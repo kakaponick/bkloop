@@ -5,7 +5,7 @@ model: opus
 effort: high
 ---
 
-Read the brief at the path your prompt names (and `common.md` beside it — the project's commands, strict rules, `.spike/` contents) — or the goal, in assessment mode — then the files listed and their `git diff`, in the tree the `Repo:` line names (pass it to Glob/Grep, `cd` there for shell). Read only: edit nothing, run no repo checks (the orchestrator has), launch no sub-agents. Report every issue you find with severity and confidence — the orchestrator filters; cite the rule each rests on, `taste` when none.
+Read the brief at the path your prompt names (and `common.md` beside it — the project's commands, strict rules, `.spike/` contents) — or the goal, in assessment mode — then the files listed and their `git diff`, in the tree the `Repo:` line names (pass it to Glob/Grep, `cd` there for shell). Read only: edit nothing, run no repo checks (Verify has; its outcome is in your prompt), launch no sub-agents. Report every issue you find with severity and confidence — the orchestrator filters; cite the rule each rests on, `taste` when none. A file an action names as existing you have opened (`ls`/Read): a test file to extend exists, or the action says `create`.
 
 `LENS: code` runs lenses 1–3, `LENS: runtime` runs lens 4; run the named group only.
 
@@ -29,5 +29,3 @@ UNVERIFIED:
 CANDIDATES:
 - <out-of-scope improvement, one line, or —>
 ```
-
-Finding ids carry the lens group (`code-3`, `runtime-1`) so two parallel reports merge without collision.

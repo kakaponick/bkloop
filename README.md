@@ -10,7 +10,7 @@
 | `claude/skills/bkloop/spike-lease.mjs` | аренда аккаунтов из `.spike/sessions/` и зеркало `.spike/` в worktree — [опционально](#spike-lease-опционально) |
 | `claude/skills/bkloop/spend.mjs` | расход токенов по сабагентам сессии, для отчёта |
 | `claude/skills/spike/SKILL.md` | `/spike <question>` — исследование неизвестного |
-| `claude/agents/` | `bkloop-implement`, `bkloop-debug`, `bkloop-critic`, `spike-researcher` |
+| `claude/agents/` | `bkloop-implement`, `bkloop-debug`, `bkloop-critic`, `bkloop-run` (sonnet: команды и проверки по списку), `spike-researcher` |
 | `claude/hooks/spike-guard.mjs` | блок ручных ссылок, копий сессий и удаления аренды |
 
 ## Требования

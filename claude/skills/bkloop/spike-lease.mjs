@@ -1,14 +1,15 @@
 #!/usr/bin/env node
-import { closeSync, existsSync, lstatSync, mkdirSync, openSync, readdirSync, readFileSync, rmdirSync, symlinkSync, unlinkSync, writeSync } from "node:fs";
-import { dirname, join, resolve } from "node:path";
+import { closeSync, existsSync, lstatSync, mkdirSync, openSync, readdirSync, readFileSync, renameSync, rmdirSync, symlinkSync, unlinkSync, writeSync } from "node:fs";
+import { basename, dirname, join, resolve } from "node:path";
 import { spawnSync } from "node:child_process";
 
 const SESSIONS = "sessions";
+const TMP = "tmp";
 const USAGE = `usage:
   spike-lease link <checkout>                          mirror the main .spike into <checkout>/.spike — everything except sessions/
   spike-lease acquire <checkout> <session> [--wait s]  take the session's lease, link .spike/sessions/<session> into <checkout>
   spike-lease release <checkout> <session>             drop the link and the lease
-  spike-lease unlink <checkout>                        remove the whole mirror (releases its sessions first)
+  spike-lease unlink <checkout>                        remove the whole mirror (releases its sessions first; a real tmp/ moves into the main .spike/tmp/)
   spike-lease status [<checkout>]                      every session and who holds it
 a session is a folder .spike/sessions/<name>/ in the main checkout; one holder at a time; a lane without the lease has no such folder.`;
 
@@ -155,12 +156,20 @@ function unlink(args) {
       continue;
     }
     if (lstatSync(p).isDirectory()) {
-      if (!isReparse(p)) die(`${p} is a real directory — refusing to remove`, 65);
-      unlinkDir(p);
+      if (isReparse(p)) unlinkDir(p);
+      else if (name === TMP) moveTmp(p, c);
+      else die(`${p} is a real directory — move it out of the mirror (into ${join(c.spike, TMP)}), then unlink again; never remove the checkout over a standing mirror`, 65);
     } else unlinkSync(p);
   }
   rmdirSync(c.mirror);
   process.stdout.write(`unlinked ${c.mirror}\n`);
+}
+
+function moveTmp(p, c) {
+  const dst = join(c.spike, TMP, `${basename(c.checkout)}-${new Date().toISOString().replace(/[:.]/g, "-")}`);
+  mkdirSync(join(c.spike, TMP), { recursive: true });
+  renameSync(p, dst);
+  process.stdout.write(`moved real ${p} to ${dst}\n`);
 }
 
 function status(args) {
